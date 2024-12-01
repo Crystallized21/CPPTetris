@@ -71,6 +71,27 @@ constexpr int Z_BLOCK[4][4]{
     {0, 0, 0, 0}
 };
 
+// Define colors for each tetromino type
+constexpr SDL_Color I_BLOCK_COLOR = {0, 255, 255, 255}; // Cyan
+constexpr SDL_Color J_BLOCK_COLOR = {0, 0, 255, 255};   // Blue
+constexpr SDL_Color L_BLOCK_COLOR = {255, 165, 0, 255};  // Orange
+constexpr SDL_Color O_BLOCK_COLOR = {255, 255, 0, 255};  // Yellow
+constexpr SDL_Color S_BLOCK_COLOR = {0, 255, 0, 255};    // Green
+constexpr SDL_Color T_BLOCK_COLOR = {128, 0, 128, 255};  // Purple
+constexpr SDL_Color Z_BLOCK_COLOR = {255, 0, 0, 255};    // Red
+
+// Array to associate colors with tetrominoes
+constexpr SDL_Color tetrominoColors[] = {
+    I_BLOCK_COLOR, // I-block
+    J_BLOCK_COLOR, // J-block
+    L_BLOCK_COLOR, // L-block
+    O_BLOCK_COLOR, // O-block
+    S_BLOCK_COLOR, // S-block
+    T_BLOCK_COLOR, // T-block
+    Z_BLOCK_COLOR  // Z-block
+};
+
+
 constexpr Tetromino tetrominoes[] = {
     {4, 4, I_BLOCK}, // I-block
     {3, 3, J_BLOCK}, // J-block
@@ -103,24 +124,52 @@ void renderGrid(SDL_Renderer *renderer) {
     }
 }
 
-void renderTetromino(SDL_Renderer *renderer, const Tetromino &tetromino, int x, int y) {
-    for (int i = 0; i < tetromino.height; i++) {
-        for (int j = 0; j < tetromino.width; j++) {
-            if (tetromino.shape[i][j] == 1) {
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red
-
-                SDL_Rect rect = {
-                    GRID_OFFSET_X + (x + j) * BLOCK_SIZE, GRID_OFFSET_Y + (y + i) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
-                };
-                SDL_RenderFillRect(renderer, &rect);
-
-                // Black Outline
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_RenderDrawRect(renderer, &rect);
+int getTetrominoIndex(const Tetromino& tetromino) {
+    for (int i = 0; i < sizeof(tetrominoes) / sizeof(Tetromino); ++i) {
+        // Check if the shapes match element by element
+        bool match = true;
+        for (int row = 0; row < 4; ++row) {
+            for (int col = 0; col < 4; ++col) {
+                if (tetromino.shape[row][col] != tetrominoes[i].shape[row][col]) {
+                    match = false;
+                    break;
+                }
             }
+            if (!match) break;
+        }
+        if (match) {
+            return i;
         }
     }
+    return -1; // Return -1 if not found
 }
+
+void renderTetromino(SDL_Renderer *renderer, const Tetromino &tetromino, int x, int y) {
+    int index = getTetrominoIndex(tetromino);
+    if (index >= 0 && index < sizeof(tetrominoColors) / sizeof(SDL_Color)) {
+        SDL_Color color = tetrominoColors[index]; // Safe color access
+
+        for (int i = 0; i < tetromino.height; i++) {
+            for (int j = 0; j < tetromino.width; j++) {
+                if (tetromino.shape[i][j] == 1) {
+                    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255); // Set color based on tetromino type
+
+                    SDL_Rect rect = {
+                        GRID_OFFSET_X + (x + j) * BLOCK_SIZE, GRID_OFFSET_Y + (y + i) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
+                    };
+                    SDL_RenderFillRect(renderer, &rect);
+
+                    // Black Outline
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                    SDL_RenderDrawRect(renderer, &rect);
+                }
+            }
+        }
+    } else {
+        cerr << "Error: Tetromino color index out of bounds." << endl;
+    }
+}
+
 
 int main() {
     // Initialise SDL
