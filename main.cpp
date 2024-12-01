@@ -3,8 +3,31 @@
 
 using namespace std;
 
-const int SCREEN_WIDTH = 600;
-const int SCREEN_HEIGHT = 800;
+constexpr int SCREEN_WIDTH = 600;
+constexpr int SCREEN_HEIGHT = 800;
+constexpr int GRID_WIDTH = 10;
+constexpr int GRID_HEIGHT = 20;
+constexpr int BLOCK_SIZE = 40;
+
+// The Global Game Grid
+int grid[GRID_HEIGHT][GRID_WIDTH] = {0};
+
+void renderGrid(SDL_Renderer *renderer) {
+    for (int y = 0; y < GRID_HEIGHT; y++) {
+        for (int x = 0; x < GRID_WIDTH; x++) {
+            if (grid[y][x] == 0) {
+                // Empty Cells
+                SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255); // Dark Grey
+            } else {
+                // Filled Cell - draw a block.
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            }
+
+            SDL_Rect rect = {x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE};
+            SDL_RenderDrawRect(renderer, &rect);
+        }
+    }
+}
 
 int main() {
     // Initialise SDL
@@ -44,5 +67,14 @@ int main() {
         SDL_Rect rect = {100, 100, 200, 200};
         SDL_RenderFillRect(renderer, &rect);
 
+        // Render
+        SDL_RenderPresent(renderer);
     }
+
+    // Clean Up
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    return 0;
 }
