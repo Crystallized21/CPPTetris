@@ -73,12 +73,12 @@ constexpr int Z_BLOCK[4][4]{
 
 // Define colors for each tetromino type
 constexpr SDL_Color I_BLOCK_COLOR = {0, 255, 255, 255}; // Cyan
-constexpr SDL_Color J_BLOCK_COLOR = {0, 0, 255, 255};   // Blue
-constexpr SDL_Color L_BLOCK_COLOR = {255, 165, 0, 255};  // Orange
-constexpr SDL_Color O_BLOCK_COLOR = {255, 255, 0, 255};  // Yellow
-constexpr SDL_Color S_BLOCK_COLOR = {0, 255, 0, 255};    // Green
-constexpr SDL_Color T_BLOCK_COLOR = {128, 0, 128, 255};  // Purple
-constexpr SDL_Color Z_BLOCK_COLOR = {255, 0, 0, 255};    // Red
+constexpr SDL_Color J_BLOCK_COLOR = {0, 0, 255, 255}; // Blue
+constexpr SDL_Color L_BLOCK_COLOR = {255, 165, 0, 255}; // Orange
+constexpr SDL_Color O_BLOCK_COLOR = {255, 255, 0, 255}; // Yellow
+constexpr SDL_Color S_BLOCK_COLOR = {0, 255, 0, 255}; // Green
+constexpr SDL_Color T_BLOCK_COLOR = {128, 0, 128, 255}; // Purple
+constexpr SDL_Color Z_BLOCK_COLOR = {255, 0, 0, 255}; // Red
 
 // Array to associate colors with tetrominoes
 constexpr SDL_Color tetrominoColors[] = {
@@ -88,7 +88,7 @@ constexpr SDL_Color tetrominoColors[] = {
     O_BLOCK_COLOR, // O-block
     S_BLOCK_COLOR, // S-block
     T_BLOCK_COLOR, // T-block
-    Z_BLOCK_COLOR  // Z-block
+    Z_BLOCK_COLOR // Z-block
 };
 
 
@@ -99,7 +99,7 @@ constexpr Tetromino tetrominoes[] = {
     {2, 2, O_BLOCK}, // O-block
     {3, 3, S_BLOCK}, // S-block
     {3, 3, T_BLOCK}, // T-block
-    {3, 3, Z_BLOCK}  // Z-block
+    {3, 3, Z_BLOCK} // Z-block
 };
 
 void renderGrid(SDL_Renderer *renderer) {
@@ -124,7 +124,7 @@ void renderGrid(SDL_Renderer *renderer) {
     }
 }
 
-int getTetrominoIndex(const Tetromino& tetromino) {
+int getTetrominoIndex(const Tetromino &tetromino) {
     for (int i = 0; i < sizeof(tetrominoes) / sizeof(Tetromino); ++i) {
         // Check if the shapes match element by element
         bool match = true;
@@ -145,17 +145,18 @@ int getTetrominoIndex(const Tetromino& tetromino) {
 }
 
 void renderTetromino(SDL_Renderer *renderer, const Tetromino &tetromino, int x, int y) {
-    int index = getTetrominoIndex(tetromino);
-    if (index >= 0 && index < sizeof(tetrominoColors) / sizeof(SDL_Color)) {
-        SDL_Color color = tetrominoColors[index]; // Safe color access
+    if (const int index = getTetrominoIndex(tetromino);
+        index >= 0 && index < sizeof(tetrominoColors) / sizeof(SDL_Color)) {
+        auto [r, g, b, a] = tetrominoColors[index];
 
         for (int i = 0; i < tetromino.height; i++) {
             for (int j = 0; j < tetromino.width; j++) {
                 if (tetromino.shape[i][j] == 1) {
-                    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255); // Set color based on tetromino type
+                    SDL_SetRenderDrawColor(renderer, r, g, b, 255); // Set color based on tetromino type
 
                     SDL_Rect rect = {
-                        GRID_OFFSET_X + (x + j) * BLOCK_SIZE, GRID_OFFSET_Y + (y + i) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
+                        GRID_OFFSET_X + (x + j) * BLOCK_SIZE, GRID_OFFSET_Y + (y + i) * BLOCK_SIZE, BLOCK_SIZE,
+                        BLOCK_SIZE
                     };
                     SDL_RenderFillRect(renderer, &rect);
 
@@ -192,7 +193,6 @@ int main() {
     Tetromino activeTetromino = tetrominoes[0]; // Start with I-block
     int tetrominoX = 3; // Starting column
     int tetrominoY = 0; // Starting row
-
 
     // The main game loop
     bool isRunning = true;
