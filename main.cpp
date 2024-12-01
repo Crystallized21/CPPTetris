@@ -173,13 +173,45 @@ void renderTetromino(SDL_Renderer *renderer, const Tetromino &tetromino, int x, 
 }
 
 // Main Gameplay Loop
-Tetromino getRandomTetromino() {
+const Tetromino &getRandomTetromino() {
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> dis(0, sizeof(tetrominoes) / sizeof(Tetromino) - 1);
 
-    int index = dis(gen);
-    return tetrominoes[index];
+    return tetrominoes[dis(gen)]; // Return a reference
+}
+
+
+bool checkCollision(const Tetromino &tetromino, int x, int y) {
+    for (int i = 0; i < tetromino.height; i++) {
+        for (int j = 0; j < tetromino.width; j++) {
+            if (tetromino.shape[i][j] == 1) {
+                int gridX = x + j;
+                int gridY = y + i;
+
+                // Check boundaries
+                if (gridX < 0 || gridX >= GRID_WIDTH || gridY >= GRID_HEIGHT) {
+                    return true;
+                }
+
+                // Check grid occupation
+                if (gridY >= 0 && grid[gridY][gridX] != 0) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void lockTetromino(const Tetromino &tetromino, int x, int y) {
+    for (int i = 0; i < tetromino.height; i++) {
+        for (int j = 0; j < tetromino.width; j++) {
+            if (tetromino.shape[i][j] == 1) {
+                grid[y + i][x + j] = 1; // Mark as occupied
+            }
+        }
+    }
 }
 
 void gameLoop(SDL_Renderer *renderer) {
@@ -187,8 +219,8 @@ void gameLoop(SDL_Renderer *renderer) {
     Uint32 lastUpdateTime = SDL_GetTicks();
     Uint32 dropInterval = 500; // Drop every 500ms
 
-    Tetromino currentTetromino = getRandomTetromino();
-    int tetrominoX = GRID_WIDTH / 2 - currentTetromino.width / 2;
+    const Tetromino* currentTetromino = &getRandomTetromino();
+    int tetrominoX = GRID_WIDTH / 2 - currentTetromino->width / 2;
     int tetrominoY = 0;
 
     while (running) {
@@ -197,38 +229,65 @@ void gameLoop(SDL_Renderer *renderer) {
             if (event.type == SDL_QUIT) {
                 running = false;
             } else if (event.type == SDL_KEYDOWN) {
+                int newX = tetrominoX, newY = tetrominoY;
+
                 switch (event.key.keysym.sym) {
                     case SDLK_LEFT:
-                        tetrominoX--; // Move left
+                        newX--; // Move left
                         break;
                     case SDLK_RIGHT:
-                        tetrominoX++; // Move right
+                        newX++; // Move right
                         break;
                     case SDLK_DOWN:
-                        tetrominoY++; // Soft drop
+                        newY++; // Soft drop
                         break;
                     case SDLK_UP:
-                        // rotateTetromino(currentTetromino);
+                        // Implement rotation logic
+                        // rotateTetromino(*currentTetromino);
                         break;
+                }
+
+                // Apply movement only if there's no collision
+                if (!checkCollision(*currentTetromino, newX, newY)) {
+                    tetrominoX = newX;
+                    tetrominoY = newY;
                 }
             }
         }
 
-        if (Uint32 currentTime = SDL_GetTicks(); currentTime - lastUpdateTime > dropInterval) {
-            tetrominoY++;
+        Uint32 currentTime = SDL_GetTicks();
+        if (currentTime - lastUpdateTime > dropInterval) {
+            if (!checkCollision(*currentTetromino, tetrominoX, tetrominoY + 1)) {
+                tetrominoY++;
+            } else {
+                // Lock the tetromino in place
+                lockTetromino(*currentTetromino, tetrominoX, tetrominoY);
+
+                // Spawn a new tetromino
+                currentTetromino = &getRandomTetromino();
+                tetrominoX = GRID_WIDTH / 2 - currentTetromino->width / 2;
+                tetrominoY = 0;
+
+                // Check for game over
+                if (checkCollision(*currentTetromino, tetrominoX, tetrominoY)) {
+                    std::cout << "Game Over!" << std::endl;
+                    running = false;
+                }
+            }
             lastUpdateTime = currentTime;
         }
 
+        // Render the game state
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        // Render the stuff
         renderGrid(renderer);
-        renderTetromino(renderer, currentTetromino, tetrominoX, tetrominoY);
+        renderTetromino(renderer, *currentTetromino, tetrominoX, tetrominoY);
 
         SDL_RenderPresent(renderer);
     }
 }
+
 
 int main() {
     // Initialise SDL
