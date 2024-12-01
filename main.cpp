@@ -9,11 +9,77 @@ constexpr int GRID_WIDTH = 10;
 constexpr int GRID_HEIGHT = 20;
 constexpr int BLOCK_SIZE = 40;
 
-// The Global Game Grid
-int grid[GRID_HEIGHT][GRID_WIDTH] = {0};
+struct Tetromino {
+    const int width;
+    const int height;
+    const int (*shape)[4]; // Pointer to a 4x4 array of integers
+};
 
-constexpr int GRID_OFFSET_X = (SCREEN_WIDTH - (GRID_WIDTH * BLOCK_SIZE)) / 2;
-constexpr int GRID_OFFSET_Y = (SCREEN_HEIGHT - (GRID_HEIGHT * BLOCK_SIZE)) / 2;
+// The Global Game Grid
+int grid[GRID_HEIGHT][GRID_WIDTH] = {};
+
+constexpr int GRID_OFFSET_X = (SCREEN_WIDTH - GRID_WIDTH * BLOCK_SIZE) / 2;
+constexpr int GRID_OFFSET_Y = (SCREEN_HEIGHT - GRID_HEIGHT * BLOCK_SIZE) / 2;
+
+// Tetromino Shape Definitions
+constexpr int I_BLOCK[4][4]{
+    {0, 0, 0, 0},
+    {1, 1, 1, 1},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+};
+
+constexpr int J_BLOCK[4][4]{
+    {1, 0, 0, 0},
+    {1, 1, 1, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+};
+
+constexpr int L_BLOCK[4][4]{
+    {0, 0, 1, 0},
+    {1, 1, 1, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+};
+
+constexpr int O_BLOCK[4][4]{
+    {1, 1, 0, 0},
+    {1, 1, 0, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+};
+
+constexpr int S_BLOCK[4][4]{
+    {0, 1, 1, 0},
+    {1, 1, 0, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+};
+
+constexpr int T_BLOCK[4][4]{
+    {0, 1, 0, 0},
+    {1, 1, 1, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+};
+
+constexpr int Z_BLOCK[4][4]{
+    {1, 1, 0, 0},
+    {0, 1, 1, 0},
+    {0, 0, 0, 0},
+    {0, 0, 0, 0}
+};
+
+constexpr Tetromino tetrominoes[] = {
+    {4, 4, I_BLOCK}, // I-block
+    {3, 3, J_BLOCK}, // J-block
+    {3, 3, L_BLOCK}, // L-block
+    {2, 2, O_BLOCK}, // O-block
+    {3, 3, S_BLOCK}, // S-block
+    {3, 3, T_BLOCK}, // T-block
+    {3, 3, Z_BLOCK}  // Z-block
+};
 
 void renderGrid(SDL_Renderer *renderer) {
     for (int y = 0; y < GRID_HEIGHT; y++) {
@@ -37,6 +103,25 @@ void renderGrid(SDL_Renderer *renderer) {
     }
 }
 
+void renderTetromino(SDL_Renderer *renderer, const Tetromino &tetromino, int x, int y) {
+    for (int i = 0; i < tetromino.height; i++) {
+        for (int j = 0; j < tetromino.width; j++) {
+            if (tetromino.shape[i][j] == 1) {
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red
+
+                SDL_Rect rect = {
+                    GRID_OFFSET_X + (x + j) * BLOCK_SIZE, GRID_OFFSET_Y + (y + i) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
+                };
+                SDL_RenderFillRect(renderer, &rect);
+
+                // Black Outline
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                SDL_RenderDrawRect(renderer, &rect);
+            }
+        }
+    }
+}
+
 int main() {
     // Initialise SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -55,6 +140,11 @@ int main() {
     // Create a renderer
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
+    Tetromino activeTetromino = tetrominoes[0]; // Start with I-block
+    int tetrominoX = 3; // Starting column
+    int tetrominoY = 0; // Starting row
+
+
     // The main game loop
     bool isRunning = true;
     SDL_Event event;
@@ -72,6 +162,9 @@ int main() {
 
         // Render the Grid
         renderGrid(renderer);
+
+        // Render the Tetromino
+        renderTetromino(renderer, activeTetromino, tetrominoX, tetrominoY);
 
         // Update the screen
         SDL_RenderPresent(renderer);
