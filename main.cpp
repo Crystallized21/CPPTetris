@@ -12,6 +12,9 @@ constexpr int BLOCK_SIZE = 40;
 // The Global Game Grid
 int grid[GRID_HEIGHT][GRID_WIDTH] = {0};
 
+constexpr int GRID_OFFSET_X = (SCREEN_WIDTH - (GRID_WIDTH * BLOCK_SIZE)) / 2;
+constexpr int GRID_OFFSET_Y = (SCREEN_HEIGHT - (GRID_HEIGHT * BLOCK_SIZE)) / 2;
+
 void renderGrid(SDL_Renderer *renderer) {
     for (int y = 0; y < GRID_HEIGHT; y++) {
         for (int x = 0; x < GRID_WIDTH; x++) {
@@ -23,7 +26,12 @@ void renderGrid(SDL_Renderer *renderer) {
                 SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
             }
 
-            SDL_Rect rect = {x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE};
+            // Calculate the cell's position on the screen
+            SDL_Rect rect = {GRID_OFFSET_X + x * BLOCK_SIZE, GRID_OFFSET_Y + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE};
+            SDL_RenderDrawRect(renderer, &rect);
+
+            // Draw Grid Lines
+            SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
             SDL_RenderDrawRect(renderer, &rect);
         }
     }
@@ -62,12 +70,10 @@ int main() {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        // Debug Render
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_Rect rect = {100, 100, 200, 200};
-        SDL_RenderFillRect(renderer, &rect);
+        // Render the Grid
+        renderGrid(renderer);
 
-        // Render
+        // Update the screen
         SDL_RenderPresent(renderer);
     }
 
