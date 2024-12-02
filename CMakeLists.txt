@@ -27,6 +27,11 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES}
         src/main.cpp
         src/grid.h
         src/grid.cpp
+        src/block.h
+        src/position.h
+        src/position.cpp
+        src/colors.h
+        src/colors.cpp
 )
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
