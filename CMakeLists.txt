@@ -25,9 +25,9 @@ set(PROJECT_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/sources/") # Define PROJECT_INCLU
 # Declaring our executable
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES}
         src/main.cpp
-        src/ball.h
-        src/ball.cpp
-        src/ball.cpp)
+        src/grid.h
+        src/grid.cpp
+)
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

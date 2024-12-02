@@ -1,25 +1,22 @@
 #include <raylib.h>
-#include "ball.h"
+#include "grid.h"
 
-int main()
-{
-    const Color darkGreen = {20, 160, 133, 255};
+int main() {
+    Color darkBlue = {44, 44, 127, 255};
+    InitWindow(300, 600, "raylib Tetris");
+    SetTargetFPS(120);
 
-    constexpr int screenWidth = 800;
-    constexpr int screenHeight = 600;
+    Grid grid = Grid();
+    grid.grid[0][0] = 1;
+    grid.grid[3][5] = 4;
+    grid.grid[17][8] = 7;
+    grid.print();
 
-    Ball ball;
-
-    InitWindow(screenWidth, screenHeight, "My first RAYLIB program!");
-    SetTargetFPS(60);
-
-    while (!WindowShouldClose())
-    {
-        ball.Update();
-
+    while (WindowShouldClose() == false) {
         BeginDrawing();
-        ClearBackground(darkGreen);
-        ball.Draw();
+        ClearBackground(darkBlue);
+        grid.Draw();
+
         EndDrawing();
     }
 
