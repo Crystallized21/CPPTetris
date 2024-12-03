@@ -16,20 +16,23 @@ bool EventTriggered(double interval) {
 }
 
 int main() {
+    std::cout << GetWorkingDirectory() << std::endl;
+
     // Seed random number generator
     std::random_device rd;
     srand(rd());
 
-    InitWindow(500, 620, "raylib Tetris");
-    SetTargetFPS(120);
+    InitWindow(500, 620, "raylib Classical Tetris");
+    SetTargetFPS(60);
 
-    Font font = LoadFontEx("Font/monogram.ttf", 64, 0, 0);
+    Font font = LoadFontEx("../font/monogram.ttf", 64, 0, 0);
 
     Game game = Game();
 
     while (WindowShouldClose() == false) {
+        UpdateMusicStream(game.music);
         game.HandleInput();
-        if (EventTriggered(0.2)) {
+        if (EventTriggered(0.4)) {
             game.MoveBlockDown();
         }
         BeginDrawing();

@@ -13,6 +13,8 @@ class Game {
 public:
     Game();
 
+    ~Game();
+
     void Draw();
 
     void HandleInput();
@@ -22,6 +24,8 @@ public:
     bool gameOver;
 
     int score;
+
+    Music music;
 private:
     Block GetRandomBlock();
     std::vector<Block> GetAllBlocks();
@@ -40,6 +44,9 @@ private:
     std::vector<Block> blocks;
     Block currentBlock;
     Block nextBlock;
+
+    Sound rotateSound;
+    Sound clearSound;
 };
 
 #endif //GAME_H
