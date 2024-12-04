@@ -13,8 +13,7 @@ Game::Game() {
     score = 0;
 
     InitAudioDevice();
-    // Music is bugged. Probably won't fix it.
-    // music = LoadMusicStream("../sounds/music.mp3");
+    music = LoadMusicStream("../sounds/music.mp3");
     PlayMusicStream(music);
 
     rotateSound = LoadSound("../sounds/rotate.mp3");
@@ -24,7 +23,7 @@ Game::Game() {
 Game::~Game() {
     UnloadSound(rotateSound);
     UnloadSound(clearSound);
-    // UnloadMusicStream(music);
+    UnloadMusicStream(music);
     CloseAudioDevice();
 }
 
