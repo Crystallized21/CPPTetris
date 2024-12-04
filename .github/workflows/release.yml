@@ -1,0 +1,71 @@
+name: Build and Release Tetris Game
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build:
+    name: Build and Package Tetris
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Configure Build
+        run: cmake -S . -B build
+
+      - name: Build Project
+        run: cmake --build build --config Release
+
+      - name: Package Executable
+        run: |
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            7z a Tetris-Windows.zip build/Release/Tetris.exe
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            zip -r Tetris-macOS.zip build/Tetris
+          else
+            tar -czvf Tetris-Linux.tar.gz build/Tetris
+          fi
+        shell: bash
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Tetris-${{ matrix.os }}
+          path: |
+            *.zip
+            *.tar.gz
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./artifacts
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ./artifacts/*.*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Tetris game for multiple platforms.
+            - Windows: Tetris-Windows.zip
+            - macOS: Tetris-macOS.zip
+            - Linux: Tetris-Linux.tar.gz
