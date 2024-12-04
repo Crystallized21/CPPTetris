@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest, macos-latest]
 
     steps:
       - name: Checkout Code
@@ -34,8 +34,6 @@ jobs:
             7z a Tetris-Windows.zip build/Release/Tetris.exe
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
             zip -r Tetris-macOS.zip build/Tetris
-          else
-            tar -czvf Tetris-Linux.tar.gz build/Tetris
           fi
         shell: bash
 
@@ -45,12 +43,12 @@ jobs:
           name: Tetris-${{ matrix.os }}
           path: |
             *.zip
-            *.tar.gz
 
   release:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
+
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v3
@@ -60,12 +58,11 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ./artifacts/*.*
+          artifacts: ./artifacts/*.zip
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
-            Tetris game for multiple platforms.
+            Tetris game for Windows and macOS:
             - Windows: Tetris-Windows.zip
             - macOS: Tetris-macOS.zip
-            - Linux: Tetris-Linux.tar.gz
